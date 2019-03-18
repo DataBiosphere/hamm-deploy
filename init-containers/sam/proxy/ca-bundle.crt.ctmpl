@@ -1,0 +1,1 @@
+{{with $environment := env "ENVIRONMENT"}}{{with $secret := vault (printf "secret/common/ca-bundle.crt")}}{{$secret.Data}}{{end}}{{end}}

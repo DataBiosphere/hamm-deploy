@@ -1,0 +1,17 @@
+{{with $environment := env "ENVIRONMENT"}}
+{{with $tcell_app_id := vault (printf "secret/dsde/firecloud/%s/common/tcell_app_id" $environment)}}
+{{with $tcell_api_key := vault (printf "secret/dsde/firecloud/%s/common/tcell_api_key" $environment)}}
+{{with $hostTag := env "HOST_TAG"}}
+{
+  "version": 1,
+  "applications": [
+    {
+      "app_id": "{{$tcell_app_id.Data.tcell_app_id}}",
+      "api_key": "{{$tcell_api_key.Data.tcell_api_key}}",
+      "tcell_input_url": "https://input.tcell.io/api/v1",
+      "host_identifier":"{{$hostTag}}",
+      "logging_options":{"enabled":true,"level":"INFO","filename":"mytcell.log"}
+    }
+  ]
+}
+{{end}}{{end}}{{end}}{{end}}

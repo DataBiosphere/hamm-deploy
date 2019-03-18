@@ -1,0 +1,14 @@
+# Persistent disk to hold opendj logs
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: opendj-log-volume
+  labels:
+    service: opendj
+spec:
+  storageClassName: protect
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 55Gi

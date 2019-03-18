@@ -1,0 +1,49 @@
+{{with $namespace := env "NAMESPACE"}}{{$project := "firecloud"}}{{with $environment := env "ENVIRONMENT"}}{{$keyname := printf "secret/devops/terraform/%s/%s/override" $environment $project}}{{with vault $keyname}}
+{{$permanent_environments := "dev,staging,alpha,perf,prod"}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  {{if $permanent_environments | contains $namespace }}name: persistent-opendj-data-volume-{{$namespace}}{{else}}name: opendj-data-volume{{end}}
+  labels:
+    service: opendj
+spec:
+  storageClassName: "{{if $permanent_environments | contains $namespace }}{{else}}protect{{end}}"
+{{if $permanent_environments | contains $namespace }}
+  volumeName: persistent-opendj-data-volume-{{$namespace}}
+{{end}}
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+{{if $permanent_environments | contains $namespace }}
+{{if .Data.firecloud_k8s_disk_size }}
+      storage: {{ .Data.firecloud_k8s_disk_size }}G
+{{else}}
+      storage: 200G
+{{end}}
+{{else}}
+      storage: 200G
+{{end}}
+{{if $permanent_environments | contains $namespace }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: persistent-opendj-data-volume-{{$namespace}}
+spec:
+  storageClassName: ""
+  capacity:
+{{if .Data.firecloud_k8s_disk_size }}
+    storage: {{ .Data.firecloud_k8s_disk_size }}G
+{{else}}
+    storage: 200G
+{{end}}
+  accessModes:
+    - ReadWriteOnce
+  gcePersistentDisk:
+    pdName: "opendj101-data-disk-{{$namespace}}"
+    fsType: ext4
+{{end}}
+{{end}}
+{{end}}
+{{end}}

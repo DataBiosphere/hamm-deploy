@@ -1,0 +1,1 @@
+{{with $environment := env "ENVIRONMENT"}}{{with $secret := vault (printf "secret/dsde/firecloud/%s/common/server.crt" $environment)}}{{$secret.Data}}{{end}}{{end}}

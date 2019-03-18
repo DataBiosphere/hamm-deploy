@@ -1,0 +1,108 @@
+{{with $environment := env "ENVIRONMENT"}}
+{{with $runContext := env "RUN_CONTEXT"}}
+{{with $dirManagerSecrets := vault (printf "secret/dsde/firecloud/%s/opendj/secrets" $environment)}}
+{{with $refreshTokenOAuthCredential := vault (printf "secret/dsde/firecloud/%s/common/refresh-token-oauth-credential.json" $environment)}}
+{{with $billingServiceAccount := vault (printf "secret/dsde/firecloud/%s/common/billing-account.json" $environment)}}
+{{with $samServiceAccount := vault (printf "secret/dsde/firecloud/%s/sam/sam-account.json" $environment)}}
+{{with $hostTag := env "HOST_TAG"}}
+
+directory {
+  url = "ldap://opendj-service:389"
+  user = "cn=Directory Manager"
+  password = "{{$dirManagerSecrets.Data.dirmanagerpw}}"
+  baseDn = "dc=dsde-{{$environment}},dc=broadinstitute,dc=org"
+  enabledUsersGroupDn = "cn=enabled-users,ou=groups,dc=dsde-{{$environment}},dc=broadinstitute,dc=org"
+  backgroundConnectionPoolSize = 5
+  connectionPoolSize = 15
+  {{if eq $runContext "fiab"}}
+  memberOfCache {
+    maxEntries = 1
+    timeToLive = 0s
+  }{{else}}
+  memberOfCache {
+    maxEntries = 10000
+    timeToLive = 60s
+  }{{end}}
+}
+
+swagger {
+  googleClientId = "{{$refreshTokenOAuthCredential.Data.web.client_id}}"
+  realm = "broad-dsde-{{$environment}}"
+}
+
+emailDomain = {{if eq $environment "qa"}}"quality.firecloud.org"{{else}}"{{$environment}}.test.firecloud.org"{{end}}
+
+googleServices {
+  appName = "firecloud:sam"
+  appsDomain = {{if eq $environment "qa"}}"quality.firecloud.org"{{else}}"{{$environment}}.test.firecloud.org"{{end}}
+  environment = "{{$environment}}"
+  pathToPem = "/etc/sam-account.pem"
+  pathToDefaultCredentialJson = "/etc/sam-account.json"
+  pathToFirestoreCredentialJson = "/etc/sam-firestore-account.json"
+  serviceAccountClientId = "{{$samServiceAccount.Data.client_id}}"
+  serviceAccountClientEmail = "{{$samServiceAccount.Data.client_email}}"
+  serviceAccountClientProject = "{{$samServiceAccount.Data.project_id}}"
+  subEmail = "google@{{if eq $environment "qa"}}quality.firecloud.org{{else}}{{$environment}}.test.firecloud.org{{end}}"
+  projectServiceAccount = "broad-dsde-{{$environment}}@gs-project-accounts.iam.gserviceaccount.com"
+  
+  billing {
+    pathToBillingPem = "/etc/billing-account.pem"
+    billingPemEmail = "{{$billingServiceAccount.Data.client_email}}"
+    billingEmail = "billing@{{if eq $environment "qa"}}quality.firecloud.org{{else}}test.firecloud.org{{end}}"
+  }
+
+  groupSync {
+    pubSubProject = broad-dsde-{{$environment}}
+    pollInterval = 1m
+    pollJitter = 10s
+    pubSubTopic = sam-group-sync{{if eq $runContext "fiab"}}-{{$hostTag}}{{else if eq $runContext "local"}}-local{{else}}{{end}}
+    pubSubSubscription = sam-group-sync{{if eq $runContext "fiab"}}-{{$hostTag}}{{else if eq $runContext "local"}}-local{{else}}{{end}}-sub
+    workerCount = 5
+  }
+
+  googleKeyCache {
+    bucketName = {{if eq $environment "prod"}}"wb-sam-key-cache"{{else}}"wb-sam-key-cache-{{$environment}}"{{end}}
+    activeKeyMaxAge = 12
+    retiredKeyMaxAge = 60
+
+    monitor {
+      pubSubProject = broad-dsde-{{$environment}}
+      pollInterval = 1m
+      pollJitter = 10s
+      pubSubTopic = sam-google-key-cache
+      pubSubSubscription = sam-google-key-cache-sub
+      workerCount = 1
+    }
+  }
+  
+  notifications.topicName=workbench-notifications-{{if eq $runContext "fiab"}}{{$hostTag}}{{else if eq $runContext "local"}}local{{else}}{{$environment}}{{end}}
+  
+  adminSdkServiceAccounts = [{{ range $i := loop 3 }}{{with $currentSA := vault (printf "secret/dsde/firecloud/%s/sam/service_accounts/service_account_%d" $environment $i)}}
+    {{$currentSA.Data | toJSON}}
+  {{ end }}{{ end }}]
+  
+}
+
+schemaLock {
+  lockSchemaOnBoot = true
+  recheckTimeInterval = 5
+  maxTimeToWait = 60
+  instanceId = {{ or (env "INSTANCE_NAME") (env "HOST_TAG") }}
+}
+
+petServiceAccount {
+  # TODO: eventually pet service accounts should live in their own separate project (managed by us)
+  googleProject = "broad-dsde-{{$environment}}"
+  serviceAccountUsers = ["leonardo-{{$environment}}@broad-dsde-{{$environment}}.iam.gserviceaccount.com"]
+}
+
+# this allows gpalloc projects to be released in sam only applicable to fiab, dev, alpha and staging
+{{if or (eq $runContext "fiab") (or (or (eq $environment "alpha") (eq $environment "dev")) (eq $environment "staging"))}}
+resourceTypes.billing-project.actionPatterns += "delete"
+resourceTypes.billing-project.roles.owner.roleActions += "delete"
+{{end}}
+
+akka.http.server.idle-timeout = 180 s
+akka.http.server.request-timeout = 60 s
+
+{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}{{end}}
