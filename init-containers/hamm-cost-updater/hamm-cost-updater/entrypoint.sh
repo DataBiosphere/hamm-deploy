@@ -18,4 +18,4 @@ then
 fi
 
 # exec startup as normal
-exec java $JAVA_OPTS -jar $(find /sam -name 'sam*.jar')
+/opt/docker/bin/costupdater

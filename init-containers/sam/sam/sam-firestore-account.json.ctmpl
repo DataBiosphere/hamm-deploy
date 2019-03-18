@@ -1,1 +1,0 @@
-{{with $environment := env "ENVIRONMENT"}}{{with $secret := vault (printf "secret/dsde/firecloud/%s/sam/sam-firestore-account.json" $environment)}}{{$secret.Data | toJSON}}{{end}}{{end}}

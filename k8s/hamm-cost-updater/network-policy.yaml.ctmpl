@@ -7,9 +7,9 @@ spec:
   - Egress
   podSelector:
     matchLabels:
-      service: sam
-      environment: dev
-      project: sam-solo
+      service: hamm-cost-updater
+      environment: {{env "ENVIRONMENT"}}
+      project: hamm
   egress:
   - {}
   policyTypes:

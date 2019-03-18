@@ -240,25 +240,6 @@ retained until being [manually cleaned up](https://kubernetes.io/docs/concepts/s
 The Storage Object In Use Protection means that PersistentVolumeClaims cannot
 be deleted while they are in use by at least one pod.
 
-### Persistent Volume Snapshots
-
-Kubernetes support for [snapshots](https://kubernetes.io/docs/concepts/storage/volume-snapshots/) is
-not yet part of the drivers GKE includes, and the disclaimers on the [driver github](https://github.com/kubernetes-sigs/gcp-compute-persistent-disk-csi-driver)
-are a little too strident for even me to think it's a good idea to start using them right now.
-But they look pretty sweet, when the time comes. It sounds like it might be in google beta in
-gke master 1.13 (we're on 1.12.5 now).
-
-Instead, we need to rely on ordinary Google Volume snapshot APIs. PersistentVolumes in k8s
-are just ordinary GCE Compute disks, so the same snapshot tools are available for them.
-The basic pattern we're going to have to follow for now is snapshotting the GCE disks underlying
-our PersistentVolumes, and if we ever need to restore from a snapshot, we'll need to create a
-GCE Persistent disk from the snapshot, then use the [instructions](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/preexisting-pd)
-to create a PersistentVolume from the disk. More details on the precise deployment
-process for snapshotted volumes is in the [persistent-volume-tests.md](/persistent-volume-tests.md).
-Note that the `protect` Storage class is _not_ applied to PersistentVolumes or PersistentVolumeClaims
-using terraform-supplied volumes--since k8s does not manage the volume, it does not try
-to clean them up.
-
 # The Init-Container Shuffle
 
 This version of the deployment process uses init containers. The startup process

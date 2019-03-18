@@ -1,0 +1,98 @@
+apiVersion: apps/v1 # Requires v1.9+ K8s node versions
+kind: Deployment
+metadata:
+  name: hamm-cost-updater-deployment
+  labels:
+    app: hamm-cost-updater
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      service: hamm-cost-updater
+      environment: {{env "ENVIRONMENT"}}
+      project: hamm
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        service: hamm-cost-updater
+        environment: {{env "ENVIRONMENT"}}
+        project: hamm
+    spec:
+      serviceAccountName: hamm-cost-updater-sa
+      initContainers:
+        - name: hamm-cost-updater-config
+          image: us.gcr.io/broad-dsp-gcr-public/hamm-cost-updater-config:latest
+          env:
+            - name: ENVIRONMENT
+              value: {{env "ENVIRONMENT"}}
+            - name: VAULT_TOKEN_FILE
+              value: /etc/vault/token
+            - name: RUN_CONTEXT
+              value: fiab
+            - name: HOST_TAG
+              value: fiab
+          volumeMounts:
+            - name: token
+              mountPath: /etc/vault
+            - name: appdir
+              mountPath: /working
+      containers:
+        - name: hamm-cost-updater
+          image: us.gcr.io/broad-dsp-gcr-public/hamm-cost-updater:latest
+          command: [ "/etc/entrypoint.sh" ]
+          ports:
+            - containerPort: 8080
+              name: app-http
+          volumeMounts:
+            - mountPath: /etc/entrypoint.sh
+              name: appdir
+              subPath: hamm-cost-updater/entrypoint.sh
+            - mountPath: /etc/application.conf
+              name: appdir
+              subPath: hamm-cost-updater/application.conf
+            - mountPath: /etc/app.env
+              name: appdir
+              subPath: hamm-cost-updater/app.env
+            - mountPath: /etc/pubsub-account.json
+              name: appdir
+              subPath: hamm-cost-updater/pubsub-account.json
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 10
+            failureThreshold: 3
+        - name: companion
+          image: ubuntu
+          # To keep container running, see: https://stackoverflow.com/questions/31870222/how-can-i-keep-a-container-running-on-kubernetes
+          command: ["sh", "-c", "trap : TERM INT; (while true; do sleep 1000; done) & wait"]
+          volumeMounts:
+            - mountPath: /init_data
+              name: appdir
+        - name: appdir
+          emptyDir: {}
+        - name: cloudsql-proxy
+          image: gcr.io/cloudsql-docker/gce-proxy:1.11
+          command: ["/cloud_sql_proxy",
+                    "-instances=workbench-firestore:us-central1:ccm=tcp:5432",
+                    "-credential_file=/secrets/cloudsql/credentials.json"]
+          securityContext:
+            runAsUser: 2  # non-root user
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: cloudsql-instance-credentials
+              mountPath: /secrets/cloudsql
+              readOnly: true

@@ -9,4 +9,4 @@ With the exception of Opendj, all services contain template configuration files 
 service itself.
 
 In addition to template configuration files, each service also has a `Dockerfile` that is used to construct the Init 
-Container Docker image for that service.   
+Container Docker image for that service.
