@@ -24,7 +24,7 @@ spec:
       serviceAccountName: hamm-cost-updater-sa
       initContainers:
         - name: hamm-cost-updater-config
-          image: us.gcr.io/broad-dsp-gcr-public/hamm-cost-updater-config:latest
+          image: us.gcr.io/broad-dsp-gcr-public/hamm-cost-updater-config:20464fa
           env:
             - name: ENVIRONMENT
               value: {{env "ENVIRONMENT"}}
