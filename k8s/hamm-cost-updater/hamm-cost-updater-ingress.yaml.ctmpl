@@ -10,12 +10,12 @@ spec:
       - hamm-cost-updater.dsde-{{env "ENVIRONMENT"}}.broadinstitute.org
       secretName: wildcard.dsde-{{env "ENVIRONMENT"}}.broadinstitute.org
   backend:
-    serviceName: hamm-cost-updater-service
+    serviceName: hamm-cost-updater
     servicePort: http
   rules:
   - host: "hamm-cost-updater.dsde-{{env "ENVIRONMENT"}}.broadinstitute.org"
     http:
       paths: /status
       - backend:
-          serviceName: hamm-cost-updater-server
+          serviceName: hamm-cost-updater
           servicePort: http
