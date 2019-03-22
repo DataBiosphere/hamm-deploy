@@ -82,8 +82,6 @@ spec:
           volumeMounts:
             - mountPath: /init_data
               name: appdir
-        - name: appdir
-          emptyDir: {}
         - name: cloudsql-proxy
           image: gcr.io/cloudsql-docker/gce-proxy:1.11
           command: ["/cloud_sql_proxy",
