@@ -15,7 +15,7 @@ spec:
   rules:
   - host: "hamm-cost-updater.dsde-{{env "ENVIRONMENT"}}.broadinstitute.org"
     http:
-      paths:
+      paths: /status
       - backend:
           serviceName: hamm-cost-updater-server
           servicePort: http

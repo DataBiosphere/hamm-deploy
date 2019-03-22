@@ -96,3 +96,18 @@ spec:
             - name: cloudsql-instance-credentials
               mountPath: /secrets/cloudsql
               readOnly: true
+      volumes:
+        #  vault secret
+        - name: token
+          secret:
+            secretName: token
+            items:
+              - key: token
+                path: token
+                mode: 0444
+        #  emptyDir used to access all configs
+        - name: appdir
+          emptyDir: {}
+        - name: cloudsql-instance-credentials
+          secret:
+            secretName: cloudsql-instance-credentials
