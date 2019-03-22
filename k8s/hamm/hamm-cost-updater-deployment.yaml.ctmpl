@@ -24,7 +24,7 @@ spec:
       serviceAccountName: hamm-cost-updater-sa
       initContainers:
         - name: hamm-cost-updater-config
-          image: us.gcr.io/broad-dsp-gcr-public/hamm-cost-updater-config:20464fa
+          image: us.gcr.io/broad-dsp-gcr-public/hamm-cost-updater-config:f671457
           env:
             - name: ENVIRONMENT
               value: {{env "ENVIRONMENT"}}
@@ -41,7 +41,7 @@ spec:
               mountPath: /working
       containers:
         - name: hamm-cost-updater
-          image: us.gcr.io/broad-dsp-gcr-public/hamm-cost-updater:latest
+          image: us.gcr.io/broad-dsp-gcr-public/hamm-cost-updater:5ccb39b1b0
           command: [ "/etc/entrypoint.sh" ]
           ports:
             - containerPort: 8080
@@ -56,13 +56,13 @@ spec:
             - mountPath: /etc/app.env
               name: appdir
               subPath: hamm-cost-updater/app.env
-            - mountPath: /etc/pubsub-account.json
+            - mountPath: /etc/hamm-notification-subscriber.json
               name: appdir
-              subPath: hamm-cost-updater/pubsub-account.json
+              subPath: hamm-cost-updater/hamm-notification-subscriber.json
           readinessProbe:
             httpGet:
-              path: /
-              port: 8080
+              path: /status
+              port: app-http
             initialDelaySeconds: 5
             periodSeconds: 10
             timeoutSeconds: 10
@@ -70,7 +70,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /status
-              port: 8080
+              port: app-http
             initialDelaySeconds: 60
             periodSeconds: 20
             timeoutSeconds: 10
@@ -82,18 +82,6 @@ spec:
           volumeMounts:
             - mountPath: /init_data
               name: appdir
-        - name: cloudsql-proxy
-          image: gcr.io/cloudsql-docker/gce-proxy:1.11
-          command: ["/cloud_sql_proxy",
-                    "-instances=workbench-firestore:us-central1:ccm=tcp:5432",
-                    "-credential_file=/secrets/cloudsql/credentials.json"]
-          securityContext:
-            runAsUser: 2  # non-root user
-            allowPrivilegeEscalation: false
-          volumeMounts:
-            - name: cloudsql-instance-credentials
-              mountPath: /secrets/cloudsql
-              readOnly: true
       volumes:
         #  vault secret
         - name: token
@@ -106,6 +94,3 @@ spec:
         #  emptyDir used to access all configs
         - name: appdir
           emptyDir: {}
-        - name: cloudsql-instance-credentials
-          secret:
-            secretName: cloudsql-instance-credentials

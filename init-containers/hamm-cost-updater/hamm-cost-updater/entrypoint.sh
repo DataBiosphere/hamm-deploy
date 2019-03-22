@@ -18,4 +18,4 @@ then
 fi
 
 # exec startup as normal
-/opt/docker/bin/costupdater
+exec /opt/docker/bin/costupdater $JAVA_OPTS

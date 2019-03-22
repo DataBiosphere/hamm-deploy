@@ -7,7 +7,7 @@ google{
     path-to-credential-json = "/etc/hamm-notification-subscriber.json"
     project-topic-name = {
       project-name = "{{$notificationSubscriberServiceAccount.Data.project_id}}"
-      topic-name = "cromwell-metadata-topic"
+      topic-name = "hamm-metadata-topic-local"
     }
     ack-dead-line = 30s
   }
