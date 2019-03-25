@@ -1,1 +1,0 @@
-{{with $environment := env "ENVIRONMENT"}}{{with $secret := vault (printf "secret/dsde/firecloud/%s/opendj/secrets" $environment)}}{{$secret.Data.dirmanagerpw}}{{end}}{{end}}
