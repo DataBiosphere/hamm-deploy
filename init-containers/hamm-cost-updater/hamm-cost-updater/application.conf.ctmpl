@@ -9,7 +9,6 @@ google{
       project-name = "{{$notificationSubscriberServiceAccount.Data.project_id}}"
       topic-name = "hamm-metadata-topic-local"
     }
-    ack-dead-line = 30s
   }
 }
 
