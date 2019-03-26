@@ -24,15 +24,13 @@ spec:
       serviceAccountName: hamm-cost-updater-sa
       initContainers:
         - name: hamm-cost-updater-config
-          image: us.gcr.io/broad-dsp-gcr-public/hamm-cost-updater-config:f671457
+          image: us.gcr.io/broad-dsp-gcr-public/hamm-cost-updater-config:7818e84
           env:
             - name: ENVIRONMENT
               value: {{env "ENVIRONMENT"}}
             - name: VAULT_TOKEN_FILE
               value: /etc/vault/token
             - name: RUN_CONTEXT
-              value: fiab
-            - name: HOST_TAG
               value: fiab
           volumeMounts:
             - name: token

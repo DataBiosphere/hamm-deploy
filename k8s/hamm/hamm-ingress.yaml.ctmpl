@@ -2,9 +2,12 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: hamm-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: "hamm-100-pub-ip"
 spec:
   rules:
-  - http:
+  - host: "hamm.dsde-{{env "ENVIRONMENT"}}.broadinstitute.org"
+    http:
       paths:
       - path: /status
         backend:

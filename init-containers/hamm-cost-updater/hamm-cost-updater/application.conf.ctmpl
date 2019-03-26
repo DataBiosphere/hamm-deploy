@@ -7,7 +7,7 @@ google{
     path-to-credential-json = "/etc/hamm-notification-subscriber.json"
     project-topic-name = {
       project-name = "{{$notificationSubscriberServiceAccount.Data.project_id}}"
-      topic-name = "hamm-metadata-topic-local"
+      topic-name = "hamm-metadata-topic-local" #Make this context aware
     }
   }
 }
