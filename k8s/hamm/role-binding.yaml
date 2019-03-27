@@ -1,0 +1,11 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: hamm-cost-updater-roles
+subjects:
+- kind: ServiceAccount
+  name: hamm-cost-updater-sa
+roleRef:
+  kind: Role
+  name: use-pod-security-policy-role
+  apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+   name: hamm-cost-updater
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: NodePort
+  selector:
+    service: hamm-cost-updater
+    environment: {{env "ENVIRONMENT"}}
+    project: hamm

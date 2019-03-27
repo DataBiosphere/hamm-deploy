@@ -1,0 +1,15 @@
+{{with $environment := env "ENVIRONMENT"}}
+{{with $runContext := env "RUN_CONTEXT"}}
+{{with $notificationSubscriberServiceAccount := vault (printf "secret/dsde/firecloud/%s/hamm-cost-updater/hamm-notification-subscriber.json" $environment)}}
+
+google{
+  subscriber{
+    path-to-credential-json = "/etc/hamm-notification-subscriber.json"
+    project-topic-name = {
+      project-name = "{{$notificationSubscriberServiceAccount.Data.project_id}}"
+      topic-name = "hamm-metadata-topic-local" #Make this context aware
+    }
+  }
+}
+
+{{end}}{{end}}{{end}}
