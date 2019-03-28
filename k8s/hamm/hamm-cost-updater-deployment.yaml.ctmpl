@@ -44,6 +44,20 @@ spec:
           ports:
             - containerPort: 8080
               name: app-http
+          env:
+            - name: POSTGRES_DB_HOST
+              value: 127.0.0.1:5432
+            # [START cloudsql_secrets]
+            - name: POSTGRES_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: hamm-postgres-app-user
+                  key: username
+            - name: POSTGRES_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hamm-postgres-app-user
+                  key: password
           volumeMounts:
             - mountPath: /etc/entrypoint.sh
               name: appdir
@@ -80,6 +94,20 @@ spec:
           volumeMounts:
             - mountPath: /init_data
               name: appdir
+        # https://cloud.google.com/sql/docs/postgres/connect-kubernetes-engine
+        # TODO: use proper environment specific instance name
+        - name: cloudsql-proxy
+          image: gcr.io/cloudsql-docker/gce-proxy:1.11
+          command: ["/cloud_sql_proxy",
+                    "-instances=broad-dsde-{{env "ENVIRONMENT"}}:us-central1:broad-dsde-dev:us-central1:hamm-cloudsql-dev101-a41a5309ace99649=tcp:5432",
+                    "-credential_file=/secrets/cloudsql/credentials.json"]
+          securityContext:
+            runAsUser: 2  # non-root user
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: cloudsql-sa
+              mountPath: /secrets/cloudsql
+              readOnly: true
       volumes:
         #  vault secret
         - name: token
@@ -92,3 +120,6 @@ spec:
         #  emptyDir used to access all configs
         - name: appdir
           emptyDir: {}
+        - name: cloudsql-sa
+          secret:
+            secretName: cloudsql-sa
