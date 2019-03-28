@@ -24,7 +24,7 @@ spec:
       serviceAccountName: hamm-cost-updater-sa
       initContainers:
         - name: hamm-cost-updater-config
-          image: us.gcr.io/broad-dsp-gcr-public/hamm-cost-updater-config:7818e84
+          image: us.gcr.io/broad-dsp-gcr-public/hamm-cost-updater-config:rl_1
           env:
             - name: ENVIRONMENT
               value: {{env "ENVIRONMENT"}}
@@ -44,20 +44,6 @@ spec:
           ports:
             - containerPort: 8080
               name: app-http
-          env:
-            - name: POSTGRES_DB_HOST
-              value: 127.0.0.1:5432
-            # [START cloudsql_secrets]
-            - name: POSTGRES_DB_USER
-              valueFrom:
-                secretKeyRef:
-                  name: hamm-postgres-app-user
-                  key: username
-            - name: POSTGRES_DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: hamm-postgres-app-user
-                  key: password
           volumeMounts:
             - mountPath: /etc/entrypoint.sh
               name: appdir
@@ -106,7 +92,9 @@ spec:
             allowPrivilegeEscalation: false
           volumeMounts:
             - name: cloudsql-sa
-              mountPath: /secrets/cloudsql
+              name: appdir
+              mountPath: /secrets/cloudsql/credentials.json
+              subPath: cloudsql-proxy/cloudsql-proxy-sa.json
               readOnly: true
       volumes:
         #  vault secret
@@ -120,6 +108,3 @@ spec:
         #  emptyDir used to access all configs
         - name: appdir
           emptyDir: {}
-        - name: cloudsql-sa
-          secret:
-            secretName: cloudsql-sa
