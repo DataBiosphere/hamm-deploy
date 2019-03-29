@@ -1,0 +1,2 @@
+{{with $environment := env "ENVIRONMENT"}}{{with $secret := vault (printf "secret/dsde/firecloud/%s/hamm-cost-updater/hamm-cloudsql-proxy.json" $environment)}}{{$secret.Data | toJSON}}{{end}}{{end}}
+

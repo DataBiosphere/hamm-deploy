@@ -14,9 +14,13 @@ Container Docker image for that service.
 # Building init container image
 * Build the image
 ```
-docker build -t "us.gcr.io/broad-dsp-gcr-public/hamm-cost-updater-config:<git-hash>" init-containers/hamm/
+docker build -t "us.gcr.io/broad-dsp-gcr-public/hamm-api-server-config:<git-hash>" init-containers/hamm-api-server/
+
+docker build -t "us.gcr.io/broad-dsp-gcr-public/hamm-cost-updater-config:<git-hash>" init-containers/hamm-cost-updater/
 ```
-* Push the image to GCR
+* Push the images to GCR
 ```
+docker push us.gcr.io/broad-dsp-gcr-public/hamm-api-server-config:<git-hash>
+
 docker push us.gcr.io/broad-dsp-gcr-public/hamm-cost-updater-config:<git-hash>
 ```

@@ -13,3 +13,7 @@ spec:
         backend:
           serviceName: hamm-cost-updater
           servicePort: http
+      - path: /*
+        backend:
+          serviceName: hamm-api-server
+          servicePort: https
