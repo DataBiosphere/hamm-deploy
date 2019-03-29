@@ -24,7 +24,7 @@ spec:
       serviceAccountName: hamm-cost-updater-sa
       initContainers:
         - name: hamm-cost-updater-config
-          image: us.gcr.io/broad-dsp-gcr-public/hamm-cost-updater-config:7818e84
+          image: us.gcr.io/broad-dsp-gcr-public/hamm-cost-updater-config:eceb0ce
           env:
             - name: ENVIRONMENT
               value: {{env "ENVIRONMENT"}}
@@ -80,6 +80,22 @@ spec:
           volumeMounts:
             - mountPath: /init_data
               name: appdir
+        # https://cloud.google.com/sql/docs/postgres/connect-kubernetes-engine
+        - name: cloudsql-proxy
+          image: gcr.io/cloudsql-docker/gce-proxy:1.11
+          command: [ "/bin/sh", "/etc/entrypoint.sh" ]
+          securityContext:
+            runAsUser: 2  # non-root user
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: cloudsql-sa
+              name: appdir
+              mountPath: /secrets/cloudsql/credentials.json
+              subPath: cloudsql-proxy/cloudsql-proxy-sa.json
+              readOnly: true
+            - mountPath: /etc/entrypoint.sh
+              name: appdir
+              subPath: cloudsql-proxy/entrypoint.sh
       volumes:
         #  vault secret
         - name: token
