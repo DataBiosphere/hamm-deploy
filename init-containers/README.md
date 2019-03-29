@@ -10,3 +10,13 @@ service itself.
 
 In addition to template configuration files, each service also has a `Dockerfile` that is used to construct the Init 
 Container Docker image for that service.
+
+# Building init container image
+* Build the image
+```
+docker build -t "us.gcr.io/broad-dsp-gcr-public/hamm-cost-updater-config:<git-hash>" init-containers/hamm/
+```
+* Push the image to GCR
+```
+docker push us.gcr.io/broad-dsp-gcr-public/hamm-cost-updater-config:<git-hash>
+```
