@@ -39,7 +39,7 @@ spec:
               mountPath: /working
       containers:
         - name: hamm-cost-updater
-          image: us.gcr.io/broad-dsp-gcr-public/hamm-cost-updater:5ccb39b1b0
+          image: us.gcr.io/broad-dsp-gcr-public/hamm-cost-updater:ccba49f
           command: [ "/etc/entrypoint.sh" ]
           ports:
             - containerPort: 8080
@@ -59,7 +59,7 @@ spec:
               subPath: hamm-cost-updater/hamm-notification-subscriber.json
           readinessProbe:
             httpGet:
-              path: /status
+              path: /costUpdater/status
               port: app-http
             initialDelaySeconds: 5
             periodSeconds: 10
@@ -67,7 +67,7 @@ spec:
             failureThreshold: 3
           livenessProbe:
             httpGet:
-              path: /status
+              path: /costUpdater/status
               port: app-http
             initialDelaySeconds: 60
             periodSeconds: 20

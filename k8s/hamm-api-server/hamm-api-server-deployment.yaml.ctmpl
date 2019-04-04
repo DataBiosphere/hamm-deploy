@@ -24,7 +24,7 @@ spec:
       serviceAccountName: hamm-api-server-sa
       initContainers:
         - name: hamm-api-server-config
-          image: us.gcr.io/broad-dsp-gcr-public/hamm-api-server-config:eceb0ce
+          image: us.gcr.io/broad-dsp-gcr-public/hamm-api-server-config:c760dc0
           env:
             - name: ENVIRONMENT
               value: {{env "ENVIRONMENT"}}
@@ -39,7 +39,7 @@ spec:
               mountPath: /working
       containers:
         - name: hamm-api-server
-          image: us.gcr.io/broad-dsp-gcr-public/hamm-api-server:5ccb39b1b0
+          image: us.gcr.io/broad-dsp-gcr-public/hamm-api-server:4fa730d
           command: [ "/etc/entrypoint.sh" ]
           ports:
             - containerPort: 8080

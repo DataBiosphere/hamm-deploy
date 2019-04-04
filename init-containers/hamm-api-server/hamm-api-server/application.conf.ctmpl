@@ -1,15 +1,22 @@
 {{with $environment := env "ENVIRONMENT"}}
-{{with $runContext := env "RUN_CONTEXT"}}
-{{with $notificationSubscriberServiceAccount := vault (printf "secret/dsde/firecloud/%s/hamm-cost-updater/hamm-notification-subscriber.json" $environment)}}
+{{with $database := vault (printf "secret/dsde/firecloud/%s/hamm/secrets/postgres/app_sql_user" $environment)}}
+{{with $billing := vault (printf "secret/dsde/firecloud/local/hamm/billing")}} #This will be removed later
 
-google{
-  subscriber{
-    path-to-credential-json = "/etc/hamm-notification-subscriber.json"
-    project-topic-name = {
-      project-name = "{{$notificationSubscriberServiceAccount.Data.project_id}}"
-      topic-name = "hamm-metadata-topic-local" #Make this context aware
-    }
+db {
+  default {
+    url = "127.0.0.1:5432"
+    user = "{{$database.Data.username}}"
+    password = "{{$database.Data.password}}"
   }
+}
+
+google {
+  service-id = "{{$billing.Data.serviceId}}"
+  service-key = "{{$billing.Data.serviceKey}}"
+}
+
+sam = {
+  sam-url = "https://sam.dsde-{{$environment}}.broadinstitute.org:443" #accomodate fiab once we have a plan for fiab
 }
 
 {{end}}{{end}}{{end}}
