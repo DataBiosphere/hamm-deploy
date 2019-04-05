@@ -1,16 +1,12 @@
 kind: NetworkPolicy
 apiVersion: networking.k8s.io/v1
 metadata:
-  name: allow-outbound
+  name: allow-outbound-hamm-api-server
 spec:
   policyTypes:
   - Egress
   podSelector:
     matchLabels:
-      service: hamm-cost-updater
-      environment: {{env "ENVIRONMENT"}}
-      project: hamm
+      service: hamm-api-server
   egress:
   - {}
-  policyTypes:
-  - Egress

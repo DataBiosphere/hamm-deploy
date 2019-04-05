@@ -1,30 +1,28 @@
 apiVersion: apps/v1 # Requires v1.9+ K8s node versions
 kind: Deployment
 metadata:
-  name: hamm-cost-updater-deployment
+  name: hamm-api-server-deployment
   labels:
-    app: hamm-cost-updater
+    app: hamm-api-server
 spec:
   replicas: 1
   revisionHistoryLimit: 1
   selector:
     matchLabels:
-      service: hamm-cost-updater
-      environment: {{env "ENVIRONMENT"}}
-      project: hamm
+      service: hamm-api-server
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        service: hamm-cost-updater
+        service: hamm-api-server
         environment: {{env "ENVIRONMENT"}}
         project: hamm
     spec:
-      serviceAccountName: hamm-cost-updater-sa
+      serviceAccountName: hamm-api-server-sa
       initContainers:
-        - name: hamm-cost-updater-config
-          image: us.gcr.io/broad-dsp-gcr-public/hamm-cost-updater-config:eceb0ce
+        - name: hamm-api-server-config
+          image: us.gcr.io/broad-dsp-gcr-public/hamm-api-server-config:c760dc0
           env:
             - name: ENVIRONMENT
               value: {{env "ENVIRONMENT"}}
@@ -38,8 +36,8 @@ spec:
             - name: appdir
               mountPath: /working
       containers:
-        - name: hamm-cost-updater
-          image: us.gcr.io/broad-dsp-gcr-public/hamm-cost-updater:5ccb39b1b0
+        - name: hamm-api-server
+          image: us.gcr.io/broad-dsp-gcr-public/hamm-api-server:4fa730d
           command: [ "/etc/entrypoint.sh" ]
           ports:
             - containerPort: 8080
@@ -47,16 +45,13 @@ spec:
           volumeMounts:
             - mountPath: /etc/entrypoint.sh
               name: appdir
-              subPath: hamm-cost-updater/entrypoint.sh
+              subPath: hamm-api-server/entrypoint.sh
             - mountPath: /etc/application.conf
               name: appdir
-              subPath: hamm-cost-updater/application.conf
+              subPath: hamm-api-server/application.conf
             - mountPath: /etc/app.env
               name: appdir
-              subPath: hamm-cost-updater/app.env
-            - mountPath: /etc/hamm-notification-subscriber.json
-              name: appdir
-              subPath: hamm-cost-updater/hamm-notification-subscriber.json
+              subPath: hamm-api-server/app.env
           readinessProbe:
             httpGet:
               path: /status

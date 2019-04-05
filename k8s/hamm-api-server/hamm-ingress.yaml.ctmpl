@@ -5,11 +5,19 @@ metadata:
   annotations:
     kubernetes.io/ingress.global-static-ip-name: "hamm-100-pub-ip"
 spec:
+  tls:
+    - hosts:
+      - hamm.dsde-{{env "ENVIRONMENT"}}.broadinstitute.org
+      secretName: wildcard.dsde-dev.broadinstitute.org
   rules:
   - host: "hamm.dsde-{{env "ENVIRONMENT"}}.broadinstitute.org"
     http:
       paths:
-      - path: /status
+      - path: /costUpdater/*
         backend:
           serviceName: hamm-cost-updater
           servicePort: http
+      - path: /*
+        backend:
+          serviceName: hamm-api-server
+          servicePort: https
