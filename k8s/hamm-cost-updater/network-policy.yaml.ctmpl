@@ -8,7 +8,5 @@ spec:
   podSelector:
     matchLabels:
       service: hamm-cost-updater
-      environment: {{env "ENVIRONMENT"}}
-      project: hamm
   egress:
   - {}

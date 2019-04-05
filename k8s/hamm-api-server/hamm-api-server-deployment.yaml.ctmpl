@@ -10,8 +10,6 @@ spec:
   selector:
     matchLabels:
       service: hamm-api-server
-      environment: {{env "ENVIRONMENT"}}
-      project: hamm
   strategy:
     type: Recreate
   template:

@@ -10,16 +10,12 @@ spec:
   selector:
     matchLabels:
       service: hamm-cost-updater
-      environment: {{env "ENVIRONMENT"}}
-      project: hamm
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
         service: hamm-cost-updater
-        environment: {{env "ENVIRONMENT"}}
-        project: hamm
     spec:
       serviceAccountName: hamm-cost-updater-sa
       initContainers:

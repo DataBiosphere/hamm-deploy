@@ -8,7 +8,5 @@ spec:
   podSelector:
     matchLabels:
       service: hamm-api-server
-      environment: {{env "ENVIRONMENT"}}
-      project: hamm
   egress:
   - {}
